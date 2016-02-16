@@ -5,7 +5,6 @@
 # 3 floats, the first two are ignored).
 # ------------------------------------------------------------------------------
 module BdgSolver
-
 using Constants
 export Material, Shape, Parameters
 
@@ -34,9 +33,9 @@ type Parameters
 end
 
 
-function Parameters(material::Material, shape::Shape)
+function Parameters(material, shape)
     μ = chemical_potential(material.ρ, material.ħω, shape.Lz)
-    ν = get_ν(μ, shape.Lz)
+    ν = get_ν(μ, material.ħω, shape.Lz)
     kmax = get_kmax(material.ħω, μ, shape.Lz)
 
     Parameters(μ, ν, kmax)
@@ -51,7 +50,7 @@ end
     Output:
         - ν: Number of bands
 """
-get_ν(μ, ħω, Lz) = floor(Lz/π * sqrt((μ + ħω)/h22m))
+get_ν(μ, ħω, Lz) = floor(Integer, Lz/π * sqrt((μ + ħω)/h22m))
 
 
 """ Calculate the maximal wavevector below the Fermi energy.
@@ -62,7 +61,7 @@ get_ν(μ, ħω, Lz) = floor(Lz/π * sqrt((μ + ħω)/h22m))
     Output:
         - Maximal wavevector
 """
-get_kmax(μ, ħω, Lz) = sqrt((μ + ħω - π^2/Lz^2)/h22m)
+get_kmax(μ, ħω, Lz) = sqrt((μ + ħω - π^2 / Lz^2) / h22m)
 
 
 """ Calculates the chemical potential self-consistently.
@@ -79,12 +78,13 @@ for μ self-consistently. [See reference]
         - μ: The chemical potential.
 """
 function chemical_potential(ρ, ħω, Lz)
-    ϵ = 0.0001  # Tolerance for the self-consistent loop
-    μ' = 0.0
+    ϵ = 0.000001  # Tolerance for the self-consistent loop
+    μ_old = 0.0
     μ = 2*h22m*pi*ρ  # Naive definition of μ
-    while abs(μ - μ') < ϵ
-        μ' = μ
-        ν = get_ν(μ', ħω, Lz)
+
+    while abs(μ - μ_old) > ϵ
+        μ_old = μ
+        ν = get_ν(μ_old, ħω, Lz)
         μ = calculate_μ(ρ, ν, Lz)
     end
     μ
