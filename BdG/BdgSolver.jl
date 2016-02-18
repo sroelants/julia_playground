@@ -162,7 +162,6 @@ F(ξ, β) = tanh(β * ξ / 2) / ξ
 
 """ Heaviside function """
 θ(x) = 0.5 * (1 + sign(x))
-end
 
 
 """ Integrate function (actually functional :) )
@@ -181,6 +180,8 @@ end
 function integrate(f, I)
     dx = 0.001
     xmin, xmax = I
-    xs = collect(linspace(xmin, xmax, ifloor((xmax - xmin)/dx)))
+    xs = collect(linspace(xmin, xmax, floor(Integer, ((xmax - xmin)/dx))))
     sum(f(xs))*dx
+end
+
 end
