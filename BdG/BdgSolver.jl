@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 module BdgSolver
 using Constants
-export Material, Shape, Parameters, System, Hamiltonian
+export Material, Shape, Parameters, System, Hamiltonian, integrate
 
 immutable Material
     name::AbstractString
@@ -156,12 +156,31 @@ F(ξ, β) = tanh(β * ξ / 2) / ξ
 
 
 
-
-
 # ------------------------------------------------------------------------------ 
 # Helper functions
 # ------------------------------------------------------------------------------ 
 
 """ Heaviside function """
 θ(x) = 0.5 * (1 + sign(x))
+end
+
+
+""" Integrate function (actually functional :) )
+
+    Take in a function of a single variable (probably a closure), sample it on
+    a range, (that is passed as well), and integrate!
+
+    Input:
+        - f: Function (of a single variable!) to be integrated
+        - I: Integration interval as a tuple
+    Output:
+        - The integral of f over I.
+
+    The plan is to make this as dimension-agnostic as possible.
+"""
+function integrate(f, I)
+    dx = 0.001
+    xmin, xmax = I
+    xs = collect(linspace(xmin, xmax, ifloor((xmax - xmin)/dx)))
+    sum(f(xs))*dx
 end
