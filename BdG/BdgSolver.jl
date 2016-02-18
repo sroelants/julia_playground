@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 module BdgSolver
 using Constants
-export Material, Shape, Parameters
+export Material, Shape, Parameters, System, Hamiltonian
 
 immutable Material
     name::AbstractString
@@ -105,4 +105,47 @@ function calculate_μ(ρ, ν, Lz)
     2 * h22m * pi * Lz * (ρ + pi/(6*Lz^3) * ν * (ν + 0.5) * (ν + 1)) / ν
 end
 
+
+# -----------------------------------------------------------------------------
+# System and Hamiltonian type 
+# -----------------------------------------------------------------------------
+type Hamiltonian
+    DOS
+end
+
+
+function Hamiltonian(shape::Shape)
+    """ Set the DOS to the standard 2D DOS (step functions). """
+    DOS(i, ξ) = 1/h22m * θ( ξ - h22m * π^2 * (i + 1)^2 / shape.Lz^2)
+    Hamiltonian(DOS)
+end
+
+
+type System
+    material::Material
+    shape::Shape
+    parameters::Parameters
+    H::Hamiltonian
+end
+
+
+function System(material::Material, shape::Shape, parameters::Parameters)
+    H = Hamiltonian(shape)
+    System(material, shape, parameters, H)
+end
+
+
+""" Get the Schrödinger wavefunction overlaps """
+function calculate_overlaps(parameters::Parameters, shape::Shape)
+    (1 + eye(parameters.ν)/2)/shape.Lz
+end
+
+
+
+# ------------------------------------------------------------------------------ 
+# Helper functions
+# ------------------------------------------------------------------------------ 
+
+""" Heaviside function """
+θ(x) = 0.5 * (1 + sign(x))
 end
