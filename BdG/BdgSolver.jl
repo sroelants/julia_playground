@@ -141,6 +141,22 @@ function calculate_overlaps(parameters::Parameters, shape::Shape)
 end
 
 
+""" Define the standard thermal weight function.
+
+    In absence of corrections, this is simply
+    F(ξ) = tanh(βξ / 2) / ξ
+
+    Input:
+        - ξ: energy (could be a range, hopefully)
+        - β: Inverse temperature (1/(kB T) )
+    Output:
+        - F(ξ), clearly...
+"""
+F(ξ, β) = tanh(β * ξ / 2) / ξ
+
+
+
+
 
 # ------------------------------------------------------------------------------ 
 # Helper functions
