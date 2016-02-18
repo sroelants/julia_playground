@@ -116,7 +116,7 @@ end
 
 function Hamiltonian(shape::Shape)
     """ Set the DOS to the standard 2D DOS (step functions). """
-    DOS(i, ξ) = 1/h22m * θ( ξ - h22m * π^2 * (i + 1)^2 / shape.Lz^2)
+    DOS(i, ξ) = 1/h22m * θ( ξ .- h22m * π^2 * (i.' + 1).^2 / shape.Lz^2)
     Hamiltonian(DOS)
 end
 
@@ -155,7 +155,6 @@ end
 F(ξ, β) = tanh(β * ξ / 2) / ξ
 
 
-
 # ------------------------------------------------------------------------------ 
 # Helper functions
 # ------------------------------------------------------------------------------ 
@@ -176,12 +175,15 @@ F(ξ, β) = tanh(β * ξ / 2) / ξ
         - The integral of f over I.
 
     The plan is to make this as dimension-agnostic as possible.
+
+    CAVEAT: If the function returns a multidimensional array, we always assume
+        the index to be integrated over to be the FIRST index.
 """
 function integrate(f, I)
     dx = 0.001
     xmin, xmax = I
     xs = collect(linspace(xmin, xmax, floor(Integer, ((xmax - xmin)/dx))))
-    sum(f(xs))*dx
+    sum(f(xs), 1)*dx
 end
 
 end
