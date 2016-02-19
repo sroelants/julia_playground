@@ -116,8 +116,18 @@ type Hamiltonian
 end
 
 
-function Hamiltonian(shape::Shape)
-    """ Set the DOS to the standard 2D DOS (step functions). """
+function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
+    """ Set the DOS to the standard 2D DOS (step functions). 
+    
+    Because we want to be able to apply corrections to this, we store the DOS as
+    a 2D array.
+
+    Input:
+        - material: The material, needed to get ħω
+        - shape: Needed for Lz
+        - parameters: Needed for μ and ν
+
+    """
     DOS(i, ξ) = 1/h22m * θ( ξ .- h22m * π^2 * (i.' + 1).^2 / shape.Lz^2)
     Hamiltonian(DOS)
 end
