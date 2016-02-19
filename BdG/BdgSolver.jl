@@ -237,6 +237,6 @@ end
     Output:
         - F(ξ), clearly...
 """
-F(ξ, β) = tanh(β * ξ / 2) / ξ
+F(ξ, β) = tanh(β * ξ / 2) ./ ξ
 
 end
