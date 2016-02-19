@@ -147,31 +147,50 @@ end
 
 
 function System(material::Material, shape::Shape, parameters::Parameters)
-    H = Hamiltonian(shape)
+    H = Hamiltonian(material, shape, parameters)
     System(material, shape, parameters, H)
 end
 
 
 """ Get Tc by solving the determinantal equation described in [Ref].
 
+    We calculate the thermal integral, multiply by the overlaps, and calculate the
+    determinant of this matrix for several values of T. The determinant should 
+    vanish for T = Tc.
+        
+        Input:
+            - system
+        Output:
+            - Tc: obviously.
 
-""" Define the standard thermal weight function.
-
-    In absence of corrections, this is simply
-    F(ξ) = tanh(βξ / 2) / ξ
-
-    Input:
-        - ξ: energy (could be a range, hopefully)
-        - β: Inverse temperature (1/(kB T) )
-    Output:
-        - F(ξ), clearly...
+    This is also where we apply possible corrections to the DOS.
 """
-F(ξ, β) = tanh(β * ξ / 2) / ξ
 
+function get_Tc(system::System)
+    χ_DW(ξ) = θ(ξ - system.parameters.μ + system.material.ħω) -
+              θ(ξ - system.parameters.μ - system.material.ħω)
 
-# ------------------------------------------------------------------------------ 
+    ξlims = (system.parameters.μ - 2*system.material.ħω,
+             system.parameters.μ + 2*system.material.ħω)
+    ξs = collect(linspace(ξlims[1], ξlims[2], NKSI))
+
+    N = system.H.DOS .* χ_DW(ξs)
+    println(N)
+    D(β) = thermal_det(β, N, ξs)
+    D(1.1)
+end
+
+function thermal_det(β::Float64, N, ξs)
+    dξ = (ξs[end] - ξs[1])/NKSI
+    weight = F(ξs, β)
+
+    I = dξ * weight.' * N
+    prod(I)
+end
+
+# ------------------------------------------------------------------------------
 # Helper functions
-# ------------------------------------------------------------------------------ 
+# ------------------------------------------------------------------------------
 
 """ Heaviside function """
 θ(x) = 0.5 * (1 + sign(x))
@@ -199,8 +218,6 @@ function integrate(f, I)
     xs = collect(linspace(xmin, xmax, floor(Integer, ((xmax - xmin)/dx))))
     sum(f(xs), 1)*dx
 end
-
-
 
 
 """ Get the Schrödinger wavefunction overlaps """
