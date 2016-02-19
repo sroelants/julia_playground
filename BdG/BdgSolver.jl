@@ -152,10 +152,7 @@ function System(material::Material, shape::Shape, parameters::Parameters)
 end
 
 
-""" Get the Schrödinger wavefunction overlaps """
-function calculate_overlaps(parameters::Parameters, shape::Shape)
-    (1 + eye(parameters.ν)/2)/shape.Lz
-end
+""" Get Tc by solving the determinantal equation described in [Ref].
 
 
 """ Define the standard thermal weight function.
@@ -202,5 +199,27 @@ function integrate(f, I)
     xs = collect(linspace(xmin, xmax, floor(Integer, ((xmax - xmin)/dx))))
     sum(f(xs), 1)*dx
 end
+
+
+
+
+""" Get the Schrödinger wavefunction overlaps """
+function calculate_overlaps(parameters::Parameters, shape::Shape)
+    (1 + eye(parameters.ν)/2)/shape.Lz
+end
+
+
+""" Define the standard thermal weight function.
+
+    In absence of corrections, this is simply
+    F(ξ) = tanh(βξ / 2) / ξ
+
+    Input:
+        - ξ: energy (could be a range, hopefully)
+        - β: Inverse temperature (1/(kB T) )
+    Output:
+        - F(ξ), clearly...
+"""
+F(ξ, β) = tanh(β * ξ / 2) / ξ
 
 end
