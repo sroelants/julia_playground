@@ -8,6 +8,8 @@ module BdgSolver
 using Constants
 export Material, Shape, Parameters, System, Hamiltonian, integrate
 
+const NKSI = 50
+
 immutable Material
     name::AbstractString
     ρ::Float64
