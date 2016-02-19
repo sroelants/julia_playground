@@ -129,7 +129,12 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
 
     """
     DOS(i, ξ) = 1/h22m * θ( ξ .- h22m * π^2 * (i.' + 1).^2 / shape.Lz^2)
-    Hamiltonian(DOS)
+
+    is = collect(range(0, parameters.ν))
+    ξs = collect(linspace(2*(parameters.μ - material.ħω),
+                          2*(parameters.μ + material.ħω), NKSI))
+    N = DOS(is, ξs)
+    Hamiltonian(N)
 end
 
 
