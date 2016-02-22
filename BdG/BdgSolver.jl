@@ -6,8 +6,8 @@
 # ------------------------------------------------------------------------------
 module BdgSolver
 using Constants
-using Roots
-export Material, Shape, Parameters, System, Hamiltonian, integrate
+#= using Roots =#
+export Material, Shape, Parameters, System, Hamiltonian
 
 const NKSI = 50
 
@@ -177,10 +177,14 @@ function get_Tc(system::System)
 
     N = system.H.DOS .* χ_DW(ξs)
     D(β) = thermal_det(β, N, ξs)
-    Roots.fzero(D, [0.1, 10])
+    
+    βs = collect(linspace(0.0, 1.0, 100))
+    Ds = map(D, βs)
+    (βs, Ds)
+    #= Roots.fzero(D, [0.1, 10]) =#
 end
 
-function thermal_det(β::Float64, N, ξs)
+function thermal_det(β, N, ξs)
     dξ = (ξs[end] - ξs[1])/NKSI
     weight = F(ξs, β)
     I = dξ * weight.' * N
@@ -236,6 +240,6 @@ end
     Output:
         - F(ξ), clearly...
 """
-F(ξ, β) = tanh(β * ξ / 2) ./ ξ
+F(ξ, β) = tanh(β .* ξ / 2) ./ ξ
 
 end
