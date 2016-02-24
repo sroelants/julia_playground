@@ -185,7 +185,16 @@ function get_Tc(system::System)
 end
 
 function thermal_det(β, N, ξs)
-    dξ = (ξs[end] - ξs[1])/NKSI
+    """ Calculate the thermal determinant that discriminates between
+    superconducting and non-superconducting regimes. Tc is determined by the
+    condition det(M - I) = 0.
+
+        Input:
+            - β: Inverse temperature
+            - N: A (discretely sampled) Density of States
+            - ξs: Energy samples along which we integrate.
+    """
+    dξ = (ξs[end] - ξs[1])/NKSI  # Or, simply ξs[2]-ξs[1] ...
     weight = F(ξs, β)
     I = dξ * weight.' * N
     prod(I)
