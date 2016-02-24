@@ -251,4 +251,56 @@ end
 """
 F(ξ, β) = tanh(β .* ξ / 2) ./ ξ
 
+
+# -----------------------------------------------------------------------------
+# Printing routines
+# -----------------------------------------------------------------------------
+
+function print_parameters(material::Material)
+    str="""
+--------------------------------------------------------------------------------
+--- Material properties --------------------------------------------------------
+--------------------------------------------------------------------------------
+--- Carrier density:            ρ   = $(material.ρ)         Bohr^{-1},
+--- Debye energy:               ħω  = $(material.ħω)        Ry,
+--- Electron phonon coupling:   λ   = $(material.λ)
+--------------------------------------------------------------------------------
+"""
+    print(str)
+end
+
+
+function print_parameters(shape::Shape)
+    str="""
+--------------------------------------------------------------------------------
+--- Shape dimensions -----------------------------------------------------------
+--------------------------------------------------------------------------------
+--- Lx  =   $(shape.Lx) Bohr,   Ly  =   $(shape.Ly) Bohr,   Lz = $(shape.Lz) Bohr
+--------------------------------------------------------------------------------
+"""
+    print(str)
+end
+
+
+function print_parameters(parameters::Parameters)
+    str="""
+--------------------------------------------------------------------------------
+--- Derived parameters  --------------------------------------------------------
+--------------------------------------------------------------------------------
+--- Chemical potential          μ       = $(parameters.μ)       Ry,
+--- Maximum band index          ν       = $(parameters.ν),
+--- Maximum wavevector          kmax    = $(parameters.kmax)    Bohr^{-1}
+--------------------------------------------------------------------------------
+"""
+    print(str)
+end
+
+
+function print_parameters(system::System)
+    print_parameters(system.shape)
+    print_parameters(system.material)
+    print_parameters(system.parameters)
+end
+
+
 end
