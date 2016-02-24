@@ -7,7 +7,7 @@
 module BdgSolver
 using Constants
 #= using Roots =#
-export Material, Shape, Parameters, System, Hamiltonian
+export Material, Shape, Parameters, System, Hamiltonian, print_parameters
 
 const NKSI = 50
 
@@ -109,6 +109,7 @@ function calculate_μ(ρ, ν, Lz)
 end
 
 
+
 # -----------------------------------------------------------------------------
 # System and Hamiltonian type 
 # -----------------------------------------------------------------------------
@@ -129,7 +130,7 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
         - parameters: Needed for μ and ν
 
     """
-    DOS(i, ξ) = 1/h22m * θ( ξ .- h22m * π^2 * (i.' + 1).^2 / shape.Lz^2)
+    DOS(i, ξ) = θ( ξ .- h22m * π^2 * (i.' + 1).^2 / shape.Lz^2)/ 2 / π / h22m
 
     is = collect(range(0, parameters.ν))
     ξs = collect(linspace(2*(parameters.μ - material.ħω),
@@ -167,6 +168,7 @@ end
     This is also where we apply possible corrections to the DOS.
 """
 
+
 function get_Tc(system::System)
     χ_DW(ξ) = θ(ξ - system.parameters.μ + system.material.ħω) -
               θ(ξ - system.parameters.μ - system.material.ħω)
@@ -184,6 +186,7 @@ function get_Tc(system::System)
     #= Roots.fzero(D, [0.1, 10]) =#
 end
 
+
 function thermal_det(β, N, ξs)
     """ Calculate the thermal determinant that discriminates between
     superconducting and non-superconducting regimes. Tc is determined by the
@@ -196,8 +199,8 @@ function thermal_det(β, N, ξs)
     """
     dξ = (ξs[end] - ξs[1])/NKSI  # Or, simply ξs[2]-ξs[1] ...
     weight = F(ξs, β)
-    I = dξ * weight.' * N
-    prod(I)
+    I = dξ * weight.' * N  # Thermal integral
+    #= prod(I)  # Rather =#
 end
 
 # ------------------------------------------------------------------------------
