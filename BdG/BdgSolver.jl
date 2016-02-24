@@ -140,6 +140,15 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
 end
 
 
+type DensityOfStates
+    N  # The DOS as a function
+    corrections::Array<T>  # An array of functions.
+end
+
+
+
+
+
 type System
     material::Material
     shape::Shape
@@ -176,6 +185,7 @@ function get_Tc(system::System)
     ξlims = (system.parameters.μ - 2*system.material.ħω,
              system.parameters.μ + 2*system.material.ħω)
     ξs = collect(linspace(ξlims[1], ξlims[2], NKSI))
+
 
     N = system.H.DOS .* χ_DW(ξs)
     D(β) = thermal_det(β, N, ξs)
