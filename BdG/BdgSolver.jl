@@ -140,12 +140,10 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
 end
 
 
-type DensityOfStates
-    N  # The DOS as a function
-    corrections::Array<T>  # An array of functions.
-end
-
-
+#= type DensityOfStates =#
+#=     N  # The DOS as a function =#
+#=     corrections::Array<T>  # An array of functions. =#
+#= end =#
 
 
 
