@@ -83,7 +83,7 @@ for μ self-consistently. [See reference]
 function chemical_potential(ρ, ħω, Lz)
     ϵ = 0.000001  # Tolerance for the self-consistent loop
     μ_old = 0.0
-    μ = 2*h22m*pi*ρ  # Naive definition of μ
+    μ = 2*h22m*π*ρ  # Naive definition of μ
 
     while abs(μ - μ_old) > ϵ
         μ_old = μ
@@ -105,7 +105,7 @@ end
         - μ: The chemical potential for given ρ, ν, Lz.
 """
 function calculate_μ(ρ, ν, Lz)
-    2 * h22m * pi * Lz * (ρ + pi/(6*Lz^3) * ν * (ν + 0.5) * (ν + 1)) / ν
+    2 * h22m * π * Lz * (ρ + π/(6*Lz^3) * ν * (ν + 0.5) * (ν + 1)) / ν
 end
 
 
@@ -113,6 +113,13 @@ end
 # -----------------------------------------------------------------------------
 # System and Hamiltonian type 
 # -----------------------------------------------------------------------------
+type DensityOfStates
+    ξ
+    N  # The DOS as an array.
+    #corrections::Array<T>  # An array of functions.
+end
+
+
 type Hamiltonian
     DOS::DensityOfStates
 end
@@ -136,15 +143,7 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
     ξs = collect(linspace(2*(parameters.μ - material.ħω),
                           2*(parameters.μ + material.ħω), NKSI))
     N = DOS(is, ξs)
-    DOS = DensityOfStates(ξs, N)
-    Hamiltonian(DOS)
-end
-
-
-type DensityOfStates
-    ξ
-    N  # The DOS as an array.
-    #corrections::Array<T>  # An array of functions.
+    Hamiltonian(DensityOfStates(ξs, N))
 end
 
 
@@ -184,10 +183,15 @@ function get_Tc(system::System)
     ξlims = (system.parameters.μ - 2*system.material.ħω,
              system.parameters.μ + 2*system.material.ħω)
     ξs = collect(linspace(ξlims[1], ξlims[2], NKSI))
+    Φ = calculate_overlaps(system.parameters, system.shape) 
+    N_mu = evaluate_at(system.H.DOS, system.parameters.μ)
+    g = system.material.λ/N_mu
+    
+    println("N(μ) = $N_mu")
+    println("g = $g")
 
-
-    N = system.H.DOS .* χ_DW(ξs)
-    D(β) = thermal_det(β, N, ξs)
+    N = system.H.DOS.N .* χ_DW(ξs)
+    D(β) = thermal_det(β, N, ξs, Φ, g)
     
     βs = collect(linspace(0.0, 1.0, 100))
     Ds = map(D, βs)
@@ -196,7 +200,7 @@ function get_Tc(system::System)
 end
 
 
-function thermal_det(β, N, ξs)
+function thermal_det(β, N, ξs, Φ, g)
     """ Calculate the thermal determinant that discriminates between
     superconducting and non-superconducting regimes. Tc is determined by the
     condition det(M - I) = 0.
@@ -209,7 +213,7 @@ function thermal_det(β, N, ξs)
     dξ = (ξs[end] - ξs[1])/NKSI  # Or, simply ξs[2]-ξs[1] ...
     weight = F(ξs, β)
     I = dξ * weight.' * N  # Thermal integral
-    #= prod(I)  # Rather =#
+    det( g/4 * Φ .* diag(I) - eye(length(I))) 
 end
 
 # ------------------------------------------------------------------------------
@@ -293,7 +297,7 @@ function print_parameters(material::Material)
 --- Material properties --------------------------------------------------------
 --------------------------------------------------------------------------------
 --- Carrier density:            ρ   = $(material.ρ)         Bohr^{-1},
---- Debye energy:               ħω  = $(material.ħω)        Ry,
+--- Debye energy:               ħω  = $(material.ħω)        Ha,
 --- Electron phonon coupling:   λ   = $(material.λ)
 --------------------------------------------------------------------------------
 """
@@ -318,7 +322,7 @@ function print_parameters(parameters::Parameters)
 --------------------------------------------------------------------------------
 --- Derived parameters  --------------------------------------------------------
 --------------------------------------------------------------------------------
---- Chemical potential          μ       = $(parameters.μ)       Ry,
+--- Chemical potential          μ       = $(parameters.μ)       Ha,
 --- Maximum band index          ν       = $(parameters.ν),
 --- Maximum wavevector          kmax    = $(parameters.kmax)    Bohr^{-1}
 --------------------------------------------------------------------------------
