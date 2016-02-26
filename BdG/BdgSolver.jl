@@ -114,7 +114,7 @@ end
 # System and Hamiltonian type 
 # -----------------------------------------------------------------------------
 type Hamiltonian
-    DOS
+    DOS::DensityOfStates
 end
 
 
@@ -136,14 +136,16 @@ function Hamiltonian(material::Material, shape::Shape, parameters::Parameters)
     ξs = collect(linspace(2*(parameters.μ - material.ħω),
                           2*(parameters.μ + material.ħω), NKSI))
     N = DOS(is, ξs)
-    Hamiltonian(N)
+    DOS = DensityOfStates(ξs, N)
+    Hamiltonian(DOS)
 end
 
 
-#= type DensityOfStates =#
-#=     N  # The DOS as a function =#
-#=     corrections::Array<T>  # An array of functions. =#
-#= end =#
+type DensityOfStates
+    ξ
+    N  # The DOS as an array.
+    #corrections::Array<T>  # An array of functions.
+end
 
 
 
