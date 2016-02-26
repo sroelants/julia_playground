@@ -193,7 +193,7 @@ function get_Tc(system::System)
     N = system.H.DOS.N .* χ_DW(ξs)
     D(β) = thermal_det(β, N, ξs, Φ, g)
     
-    βs = collect(linspace(0.0, 1.0, 100))
+    βs = collect(linspace(0.0, 100.0, 100))
     Ds = map(D, βs)
     (βs, Ds)
     #= Roots.fzero(D, [0.1, 10]) =#
