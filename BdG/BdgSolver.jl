@@ -148,7 +148,6 @@ type DensityOfStates
 end
 
 
-
 type System
     material::Material
     shape::Shape
@@ -263,6 +262,25 @@ end
         - F(ξ), clearly...
 """
 F(ξ, β) = tanh(β .* ξ / 2) ./ ξ
+
+
+function evaluate_at(DOS::DensityOfStates, E)
+    """ Return the DOS (summed over all bands i) at a given energy E
+
+    Since we store the DOS as a discrete array, the evaluation is only
+    approximate. We look for the nearest match to E in the ξ-array stored in 
+    the DOS, and return the corresponding value of N (again, summed over the 
+    second axis).
+
+    Input:
+        - DOS: A density of states 
+        - E: the energy at which to evaluate the DOS.
+    Output:
+        - The density of states at E.
+    """
+    index = indmin(abs(DOS.ξ - E))
+    sum(DOS.N, 2)[index]
+end
 
 
 # -----------------------------------------------------------------------------
